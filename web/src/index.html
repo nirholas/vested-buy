@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VestedBuy: Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit</title>
+<meta name="description" content="Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit.">
+<link rel="canonical" href="https://vested-buy.pages.dev/">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#07080b">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="VestedBuy">
+<meta property="og:title" content="VestedBuy">
+<meta property="og:description" content="Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit.">
+<meta property="og:url" content="https://vested-buy.pages.dev/">
+<meta property="og:image" content="https://vested-buy.pages.dev/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="VestedBuy">
+<meta name="twitter:description" content="Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit.">
+<meta name="twitter:image" content="https://vested-buy.pages.dev/og.png">
+
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="alternate" type="text/plain" title="For language models" href="/llms.txt">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"VestedBuy","description":"Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit.","url":"https://vested-buy.pages.dev","codeRepository":"https://github.com/nirholas/vested-buy","programmingLanguage":"Solidity","runtimePlatform":"Ethereum Virtual Machine","license":"https://www.apache.org/licenses/LICENSE-2.0","keywords":"launch, vesting, anti-flip, time, no-admin","isPartOf":{"@type":"WebSite","name":"HookForge","url":"https://hookforge.pages.dev"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <div class="shell masthead__inner">
+    <a class="brand" href="/">VestedBuy</a>
+    <nav aria-label="Primary">
+      <a href="#how">How it works</a>
+      <a href="#using">Using it</a>
+      <a href="#deploy">Deploy</a>
+      <a href="https://github.com/nirholas/vested-buy" rel="noopener">GitHub</a>
+      <a href="https://hookforge.pages.dev" rel="noopener">Catalogue</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div class="stage">
+    <div class="scene">
+      <canvas data-permissions="{&quot;afterRemoveLiquidityReturnsDelta&quot;:false,&quot;afterAddLiquidityReturnsDelta&quot;:false,&quot;afterSwapReturnsDelta&quot;:true,&quot;beforeSwapReturnsDelta&quot;:false,&quot;afterDonate&quot;:false,&quot;beforeDonate&quot;:false,&quot;afterSwap&quot;:true,&quot;beforeSwap&quot;:false,&quot;afterRemoveLiquidity&quot;:false,&quot;beforeRemoveLiquidity&quot;:false,&quot;afterAddLiquidity&quot;:false,&quot;beforeAddLiquidity&quot;:false,&quot;afterInitialize&quot;:true,&quot;beforeInitialize&quot;:false}" aria-hidden="true"></canvas>
+      <p class="scene__fallback">VestedBuy implements 3 of the fourteen Uniswap v4 callbacks: afterInitialize, afterSwap, afterSwapReturnsDelta.</p>
+    </div>
+    <p class="scene__hint">drag to orbit</p>
+
+  <section class="shell hero">
+    <p class="eyebrow">Uniswap v4 hook &middot; Time</p>
+    <h1>VestedBuy</h1>
+    <p class="lede">Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit.</p>
+    <div class="cta-row">
+      <a class="btn btn--primary" href="https://github.com/nirholas/vested-buy" rel="noopener">Source on GitHub</a>
+      <a class="btn" href="#using">Use it in a pool</a>
+      <a class="btn" href="/hook.json">Manifest JSON</a>
+    </div>
+
+    <dl class="stats">
+      <div class="stat"><dt>Family</dt><dd>Time</dd></div>
+      <div class="stat"><dt>Callbacks</dt><dd>3 of 14</dd></div>
+      <div class="stat"><dt>Fee</dt><dd>static</dd></div>
+      <div class="stat"><dt>Admin keys</dt><dd>none</dd></div>
+      <div class="stat"><dt>Licence</dt><dd>Apache-2.0</dd></div>
+    </dl>
+  </section>
+  </div>
+
+  <section class="shell">
+    <h2 id="how">How it works</h2>
+      <p>A token that wants its early buyers to hold has two options today and both are bad. Vesting in the token contract binds everyone forever, including the market makers and the exchanges the project needs, and it is the reason so many tokens ship with transfer restrictions nobody can later remove. Or the project vests nothing and watches the first hour decide the price, because a buyer who can sell immediately is not a holder, they are a position with a very short horizon.</p>
+      <p>The thing that actually wants vesting is not the token, it is the purchase. Buying through this pool during its vesting period delivers a share of the tokens now and the rest on a schedule, and the token itself is untouched: no transfer hooks, no allowlist, no permanent restriction, and every other venue trades it normally. A project can point its launch at this pool, get holders rather than flippers out of it, and still have a plain ERC-20.</p>
+      <p>The buyer keeps `immediateBps` of the fill and the hook holds the rest as ERC-6909 claims, releasing them linearly from `cliff` to `cliff + duration`. Claims are paid as real tokens. Attribution needs no signature.</p>
+      <p>`hookData` may name who the vested tokens belong to, and naming somebody else gives them your tokens, which is the only thing a forged attribution achieves. A buy that names nobody vests to the router it came through, which lets a launchpad run the vesting for its users. Exact-output buys are refused while vesting is live, and that is a security property rather than a limitation.</p>
+      <p>Uniswap v4 lets a hook adjust only the swap's unspecified currency, which on an exact-output buy is the input, not the output. A hook that quietly declined to vest those would be a hook whose vesting is bypassed by changing one field, so it says no instead.</p>
+
+    <div class="callout callout--prior"><h3>Prior art</h3><p>Vesting is normally a property of the token (transfer restrictions, locked allocations) or of a distribution contract that holds an allocation and releases it. Vesting the purchase at the venue, so the token stays a plain ERC-20 and only buys through this pool are vested, is the contribution here.</p></div>
+    <div class="callout callout--warn"><h3>Where it does not help</h3><p>It binds one pool. The same token bought anywhere else is not vested, so this shapes a launch rather than enforcing a lockup, and a project that needs the second should vest in the token. The schedule also cannot be cancelled or clawed back by anybody, including the project, which is deliberate but means a buyer who loses their key loses the unvested remainder.</p></div>
+
+    <h2 id="using">Using it</h2>
+    <p>
+      Uniswap v4 removed <code>hookData</code> from <code>initialize</code>, so per-pool parameters arrive out of band.
+      Fix them for a pool key whose pool does not exist yet, then initialize. Nobody can change them afterwards,
+      including you.
+    </p>
+    <pre><code>hook.configure(
+    key,
+    VestedBuyHook.Config({
+        buyIsZeroForOne: /* bool */ 0,
+        immediateBps: /* uint16 */ 0,
+        cliff: /* uint32 */ 0,
+        duration: /* uint32 */ 0,
+        endsAt: /* uint64 */ 0
+    })
+);
+
+poolManager.initialize(key, startingSqrtPriceX96);</code></pre>
+    
+
+    <h3>Parameters</h3>
+    <table>
+        <thead><tr><th>Parameter</th><th>Type</th><th>Units</th></tr></thead>
+        <tbody><tr><td><code>buyIsZeroForOne</code></td><td><code>bool</code></td><td></td></tr>
+          <tr><td><code>immediateBps</code></td><td><code>uint16</code></td><td>basis points (<code>10000</code> = 100%)</td></tr>
+          <tr><td><code>cliff</code></td><td><code>uint32</code></td><td></td></tr>
+          <tr><td><code>duration</code></td><td><code>uint32</code></td><td></td></tr>
+          <tr><td><code>endsAt</code></td><td><code>uint64</code></td><td></td></tr></tbody>
+      </table>
+
+    <h3>From TypeScript</h3>
+    <pre><code>npm i @hookforge/sdk
+
+import {getHook, hookAddress, poolKeyFor} from "@hookforge/sdk";
+
+const hook = getHook("vested-buy");
+const key  = poolKeyFor({
+  hook: hookAddress("vested-buy", 8453),   // Base
+  currencyA: USDC, currencyB: WETH,
+  tickSpacing: 60,
+});</code></pre>
+
+    <h2>What it reverts with</h2>
+    <table>
+        <thead><tr><th>Error</th><th>Meaning</th></tr></thead>
+        <tbody><tr><td><code>EndsInThePast()</code></td><td>A vesting period that has already ended cannot be configured.</td></tr>
+          <tr><td><code>ExactOutputBuysRefused()</code></td><td>Exact-output buys cannot be vested, so they are refused while vesting is live. See the contract notes.</td></tr>
+          <tr><td><code>InvalidShare()</code></td><td><code>immediateBps</code> above 100% would deliver more than the buy produced.</td></tr>
+          <tr><td><code>NothingVested()</code></td><td>There is nothing unlocked to claim.</td></tr>
+          <tr><td><code>PayoutNotPoolManager()</code></td><td>Only the <code>PoolManager</code> may drive the callback. Named distinctly because <code>BaseHook</code> declares its own.</td></tr>
+          <tr><td><code>PoolAlreadyInitialized()</code></td><td>The pool already exists, so its configuration is final.</td></tr>
+          <tr><td><code>PoolNotConfigured()</code></td><td>The pool was initialized without a configuration for this hook.</td></tr></tbody>
+      </table>
+
+    <h2>The callbacks it claims</h2>
+    <p>
+      Uniswap v4 reads a hook's permissions from the low fourteen bits of its own address, which is why deploying one
+      means mining a CREATE2 salt. This hook claims 3, so every deployment of it has an address ending
+      in <code>0x1044</code>.
+    </p>
+    <ul class="flags"><li class="flag">beforeInitialize</li><li class="flag flag--on">afterInitialize</li><li class="flag">beforeAddLiquidity</li><li class="flag">afterAddLiquidity</li><li class="flag">beforeRemoveLiquidity</li><li class="flag">afterRemoveLiquidity</li><li class="flag">beforeSwap</li><li class="flag flag--on">afterSwap</li><li class="flag">beforeDonate</li><li class="flag">afterDonate</li><li class="flag">beforeSwapReturnsDelta</li><li class="flag flag--on">afterSwapReturnsDelta</li><li class="flag">afterAddLiquidityReturnsDelta</li><li class="flag">afterRemoveLiquidityReturnsDelta</li></ul>
+
+    <h2>It says what it is, on-chain</h2>
+    <p>
+      Nothing about a hook's address tells an indexer, a wallet, a router or an agent what the pool does, which is why
+      hook discovery today is a curated list. This hook answers for itself, in one <code>eth_call</code>, with no
+      registry in the loop.
+    </p>
+    <pre><code>cast call $HOOK "hookName()(string)"    # VestedBuy
+cast call $HOOK "specURI()(string)"     # https://vested-buy.pages.dev/hook.json
+cast call $HOOK "hookTags()(string[])"  # launch, vesting, anti-flip, time, no-admin</code></pre>
+
+    <h2 id="deploy">Build, test and deploy</h2>
+    <pre><code>git clone --recurse-submodules https://github.com/nirholas/vested-buy
+cd vested-buy
+forge build &amp;&amp; forge test
+
+# Dry run: mines the salt, prints the address, sends nothing.
+forge script script/Deploy.s.sol --rpc-url $RPC_URL
+
+# For real.
+forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast --verify</code></pre>
+
+    <div class="callout callout--warn">
+      <h3>Status</h3>
+      <p>
+        <strong>Unaudited.</strong> Built to an audited shape, on OpenZeppelin's audited hook bases, and tested against
+        a real <code>PoolManager</code>. No third party has reviewed it. Read "where it does not help" above before
+        putting money behind it. Not affiliated with Uniswap Labs.
+      </p>
+    </div>
+  </section>
+
+  <section class="shell">
+    <h2 id="try">Try it</h2>
+    <p>
+      This is the hook running, not a picture of it. Connect a wallet on a chain it is deployed to, or bring the whole
+      stack up locally in one command and use it with no funds and no wallet risk at all.
+    </p>
+    <div class="demo" data-demo="vested-buy">
+      <div class="panel panel--empty">
+        <p>Loading the demo… if this does not change, JavaScript is blocked and the demo cannot run.</p>
+      </div>
+    </div>
+    <details class="raw">
+      <summary>Run the whole thing locally</summary>
+      <pre><code>git clone --recurse-submodules https://github.com/nirholas/vested-buy
+cd vested-buy
+
+anvil &amp;
+forge script script/DeployLocal.s.sol --rpc-url http://127.0.0.1:8545 --broadcast \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+node web/build.mjs &amp;&amp; npx serve web/dist</code></pre>
+      <p class="muted">
+        The deploy script writes <code>web/local.json</code> itself and the build merges it, so the page points at the
+        chain you just created without you editing anything. Point a wallet at
+        <code>http://127.0.0.1:8545</code> and every button on this page works.
+      </p>
+      <p class="muted">
+        Anvil's first account is pre-funded and its key is public by design. Never use it anywhere real.
+      </p>
+    </details>
+  </section>
+  <script type="application/json" id="deployments">{"chains":{},"errors":[{"type":"error","name":"EndsInThePast","inputs":[]},{"type":"error","name":"ExactOutputBuysRefused","inputs":[]},{"type":"error","name":"HookNotImplemented","inputs":[]},{"type":"error","name":"InvalidPool","inputs":[]},{"type":"error","name":"InvalidShare","inputs":[]},{"type":"error","name":"NotPoolManager","inputs":[]},{"type":"error","name":"NothingVested","inputs":[]},{"type":"error","name":"PayoutNotPoolManager","inputs":[]},{"type":"error","name":"PoolAlreadyInitialized","inputs":[]},{"type":"error","name":"PoolNotConfigured","inputs":[]}],"demo":{"panel":"rewards","title":"Buy now, receive over time","lede":"Buying through this pool delivers part of the fill immediately and vests the rest. The token itself is untouched: no transfer hooks, no allowlist.","calls":[],"owed":{"name":"claimable","args":["poolId","account"],"types":{}},"owedLabel":"unlocked and claimable"}}</script>
+  <script type="module" src="/assets/demo.js"></script>
+</main>
+
+<footer class="foot">
+  <div class="shell">
+    <p>
+      <a href="https://github.com/nirholas/vested-buy" rel="noopener">Source</a> &middot;
+      <a href="/hook.json">Manifest</a> &middot;
+      <a href="/llms.txt">llms.txt</a> &middot;
+      <a href="https://hookforge.pages.dev" rel="noopener">The rest of the catalogue</a>
+    </p>
+    <p>Apache-2.0 licensed. Not affiliated with Uniswap Labs.</p>
+  </div>
+</footer>
+<script type="module" src="/assets/scene.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "name": "vested-buy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nirholas/vested-buy.git"
+  },
+  "homepage": "https://vested-buy.pages.dev",
+  "keywords": [
+    "uniswap",
+    "uniswap-v4",
+    "uniswap-hooks",
+    "defi",
+    "amm",
+    "solidity",
+    "launch",
+    "vesting",
+    "anti-flip",
+    "time",
+    "no-admin"
+  ],
+  "scripts": {
+    "build": "node web/build.mjs",
+    "contracts:build": "forge build",
+    "contracts:test": "forge test"
+  }
+}
