@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "vested-buy"
+abstract: "Vests what a buyer receives, at the pool, so a launch can sell without handing every buyer a same-block exit."
+license: Apache-2.0
+repository-code: "https://github.com/nirholas/vested-buy"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"
